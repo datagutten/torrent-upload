@@ -154,31 +154,31 @@ class site
     }
 
     /**
-     * @param $data
-     * @param $topic
+     * @param array $args Array with the fields torrentfile, title and description, optionally mediainfo
+     * @param string $topic
      * @return array|mixed
      * @throws FileNotFoundException
      */
-    public function upload($data, $topic)
+    public function upload($args, $topic)
     {
         $template = $this->get_template('upload');
         $required_fields = array('torrentfile', 'title', 'description');
         $optional_fields = array('mediainfo');
-        if(!file_exists($data['torrentfile']))
-            throw new FileNotFoundException($data['torrentfile']);
-        $data['torrentfile'] = new CURLFile($data['torrentfile']);
+        if(!file_exists($args['torrentfile']))
+            throw new FileNotFoundException($args['torrentfile']);
+        $args['torrentfile'] = new CURLFile($args['torrentfile']);
 
         $postdata = array();
         foreach($required_fields as $field)
         {
-            if(!isset($data[$field]))
+            if(!isset($args[$field]))
                 throw new InvalidArgumentException('Missing required field: '.$field);
-            $postdata[$template[$field]] = $data[$field];
+            $postdata[$template[$field]] = $args[$field];
         }
         foreach ($optional_fields as $field)
         {
-            if(isset($data[$field]) && isset($template[$field]))
-                $postdata[$template[$field]] = $data[$field];
+            if(isset($args[$field]) && isset($template[$field]))
+                $postdata[$template[$field]] = $args[$field];
             elseif(isset($template[$field]))
                 $postdata[$template[$field]] = '';
         }
