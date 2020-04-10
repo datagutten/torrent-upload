@@ -34,7 +34,7 @@ class cookie_saver
         $cookies = array();
         foreach($jar as $name=>$value)
         {
-            if(is_a($value, 'Requests_Cookie_Jar'))
+            if(is_a($value, 'Requests_Cookie'))
                 $cookies[$value->name] = $value->value;
             elseif(is_string($value))
                 $cookies[$name]=$value;
