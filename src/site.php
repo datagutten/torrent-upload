@@ -201,15 +201,4 @@ class site
         $template = $this->get_template('upload');
         return $this->post($template['url'], array('Content-Type'=>'multipart/form-data'), $postdata);
     }
-
-    function get_title($body)
-    {
-        $dom = new DOMDocument();
-        @$dom->loadHTML($body);
-        $title = $dom->getElementsByTagName('title');
-        if($title->length>0)
-            return $title->item(0)->textContent;
-        else
-            return '';
-    }
 }

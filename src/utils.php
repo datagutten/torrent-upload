@@ -4,6 +4,7 @@
 namespace torrentupload;
 
 
+use DOMDocument;
 use PHP\BitTorrent\Torrent;
 
 class utils
@@ -37,5 +38,21 @@ class utils
         else
             echo "Torrent is already created\n";
         return $torrent_file;
+    }
+
+    /**
+     * Get the page title
+     * @param string $body HTML string
+     * @return string Page title
+     */
+    public static function get_title(string $body): string
+    {
+        $dom = new DOMDocument();
+        @$dom->loadHTML($body);
+        $title = $dom->getElementsByTagName('title');
+        if($title->length>0)
+            return $title->item(0)->textContent;
+        else
+            return '';
     }
 }
