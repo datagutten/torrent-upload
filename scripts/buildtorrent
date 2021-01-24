@@ -1,0 +1,19 @@
+#!/usr/bin/php
+<?Php
+
+use datagutten\tools\files\files;
+use torrentupload\utils;
+
+foreach (array(__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php') as $file)
+{
+    if (file_exists($file))
+    {
+        /** @noinspection PhpIncludeInspection */
+        require $file;
+        break;
+    }
+}
+
+$torrent_file = files::path_join(dirname($argv[1]), basename($argv[1])) . '.torrent';
+$torrent = utils::create_torrent($argv[1], $torrent_file);
+printf("Torrent created as %s\n", $torrent);
