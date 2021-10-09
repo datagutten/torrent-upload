@@ -1,0 +1,122 @@
+#!/usr/bin/php
+<?php
+require __DIR__ . '/loader.php';
+
+use GetOpt\ArgumentException;
+use GetOpt\ArgumentException\Missing;
+use GetOpt\GetOpt;
+use GetOpt\Option;
+use torrentupload\exceptions;
+use torrentupload\sites;
+use torrentupload\utils;
+
+$options = [['s', 'site', GetOpt::REQUIRED_ARGUMENT, 'Site name'],
+    ['p', 'path', GetOpt::REQUIRED_ARGUMENT, 'File or folder to be uploaded'],
+    ['c', 'category', GetOpt::REQUIRED_ARGUMENT, 'Torrent category']];
+
+$getOpt = new GetOpt($options);
+
+$optionSite = new Option(null, 'site', GetOpt::REQUIRED_ARGUMENT);
+$optionSite->setDescription(
+    'Site name'
+);
+$optionSite->setValidation('is_string');
+
+// process arguments and catch user errors
+try
+{
+    try
+    {
+        $getOpt->process();
+    }
+    catch (Missing $exception)
+    {
+        // catch missing exceptions if help is requested
+        if (!$getOpt->getOption('help'))
+        {
+            throw $exception;
+        }
+    }
+}
+catch (ArgumentException $exception)
+{
+    file_put_contents('php://stderr', $exception->getMessage() . PHP_EOL);
+    echo PHP_EOL . $getOpt->getHelpText();
+    exit;
+}
+
+if (empty($getOpt->getOptions()) || count($getOpt->getOptions()) != count($options) * 2)
+    die($getOpt->getHelpText());
+
+
+$site_name = $getOpt->getOption('site');
+$site_name = 'torrentupload\\sites\\' . $site_name;
+
+
+/** @var sites\common $site */
+$site = new $site_name;
+
+$pathinfo = pathinfo($getOpt->getOption('path'));
+
+$file_torrent = sprintf('%s/%s.torrent', $pathinfo['dirname'], $pathinfo['basename']);
+$file_mediainfo = sprintf('%s/%s.mediainfo', $pathinfo['dirname'], $pathinfo['basename']);
+if (!file_exists($file_mediainfo))
+{
+    $mediainfo = '';
+    printf("Mediainfo not found %s\n", $file_mediainfo);
+}
+else
+    $mediainfo = file_get_contents($file_mediainfo);
+$file_description = sprintf('%s/%s.txt', $pathinfo['dirname'], $pathinfo['filename']);
+if (!file_exists($file_description))
+    die("Missing description file\n");
+else
+    $description = file_get_contents($file_description);
+
+$folder_output = $pathinfo['dirname'];
+
+try
+{
+    $user = $site->is_logged_in();
+    if ($user === false)
+    {
+        $login = $site->get_login();
+        $user = $site->login($login['username'], $login['password']);
+    }
+    printf("logged in as %s\n", $user);
+}
+catch (exceptions\LoginFailedException $e)
+{
+    die(sprintf("Login failed: %s\n%s", $e->getMessage(), $e->getTraceAsString()));
+}
+
+try
+{
+    utils::buildtorrent($getOpt->getOption('path'), $file_torrent, 'http://tracker/announce.php');
+}
+catch (Exception $e)
+{
+    die(sprintf("Error creating torrent: %s\n%s", $e->getMessage(), $e->getTraceAsString()));
+}
+
+$args = ['torrentfile' => $file_torrent, 'description' => $description, 'title' => $pathinfo['filename'], 'mediainfo' => $mediainfo];
+try
+{
+    $args += $site->get_template($getOpt->getOption('category'));
+}
+catch (FileNotFoundException $e)
+{
+    die('Invalid category ' . $getOpt->getOption('category') . "\n");
+}
+
+try
+{
+    $torrent_url = $site->upload(...$args);
+    unlink($file_torrent);
+    $site->session->get($torrent_url, [], ['filename' => $file_torrent]);
+    printf("Uploaded file saved as %s\n", $file_torrent);
+}
+catch (exceptions\UploadFailedException $e)
+{
+    printf("Upload failed: %s\n%s", $e->getMessage(), $e->getTraceAsString());
+}

@@ -3,5 +3,5 @@ composer.phar
 composer.lock
 
 cookies
-templates
-logins
+/templates/
+/logins
