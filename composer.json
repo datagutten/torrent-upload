@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "datagutten/tools": "^1.1",
-        "rmccue/requests": "^1.7",
+        "rmccue/requests": "^2.0",
         "christeredvartsen/php-bittorrent": "^2.0",
         "ext-json": "*",
         "php": ">=8.0",

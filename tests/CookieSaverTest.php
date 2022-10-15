@@ -5,14 +5,13 @@ namespace torrentupload\tests;
 
 
 use datagutten\Requests_extensions\cookie_saver;
-use FileNotFoundException;
 use PHPUnit\Framework\TestCase;
-use Requests_Session;
+use WpOrg\Requests;
 
 class CookieSaverTest extends TestCase
 {
     /**
-     * @var Requests_Session
+     * @var Requests\Session
      */
     public $session;
     /**
@@ -24,7 +23,7 @@ class CookieSaverTest extends TestCase
 
     public function setUp(): void
     {
-        $this->session = new Requests_Session('https://httpbin.org');
+        $this->session = new Requests\Session('https://httpbin.org');
         $this->saver = new cookie_saver();
         $this->file = $this->saver->file('test');
         if(file_exists($this->file))

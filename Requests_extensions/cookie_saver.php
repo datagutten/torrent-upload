@@ -1,6 +1,6 @@
 <?php
 namespace datagutten\Requests_extensions;
-use Requests_Cookie_Jar;
+use WpOrg\Requests;
 use FileNotFoundException;
 use InvalidArgumentException;
 use TypeError;
@@ -27,14 +27,14 @@ class cookie_saver
     }
 
     /**
-     * @param Requests_Cookie_Jar $jar
+     * @param Requests\Cookie\Jar $jar
      * @param string $file
      */
     function save_cookies($jar, $file) {
         $cookies = array();
         foreach($jar as $name=>$value)
         {
-            if(is_a($value, 'Requests_Cookie'))
+            if(is_a($value, 'WpOrg\\Requests\\Cookie'))
                 $cookies[$value->name] = $value->value;
             elseif(is_string($value))
                 $cookies[$name]=$value;
@@ -52,7 +52,7 @@ class cookie_saver
 
     /**
      * @param $file
-     * @return Requests_Cookie_Jar Cookie jar
+     * @return Requests\Cookie\Jar Cookie jar
      * @throws FileNotFoundException
      */
     function load_cookies($file)
@@ -62,6 +62,6 @@ class cookie_saver
             throw new FileNotFoundException($file);
         $json = file_get_contents($file);
         $cookies = json_decode($json, true);
-        return new Requests_Cookie_Jar($cookies);
+        return new Requests\Cookie\Jar($cookies);
     }
 }

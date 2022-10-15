@@ -7,9 +7,7 @@ namespace torrentupload;
 use datagutten\Requests_extensions\cookie_saver;
 use datagutten\tools\files\files;
 use FileNotFoundException;
-use Requests_Exception;
-use Requests_Response;
-use Requests_Session;
+use WpOrg\Requests;
 
 abstract class site
 {
@@ -32,6 +30,11 @@ abstract class site
     public $session;
 
     /**
+     * @var array Post data to be used in HTTP request
+     */
+    private $post_fields;
+
+    /**
      * site constructor.
      * @param $site
      * @throws FileNotFoundException
@@ -45,8 +48,7 @@ abstract class site
         $this->site_folder = realpath($site_folder);
         $options = array();
 
-        $options += ['transport'=>'datagutten\\Requests_extensions\\transport_cURL_multipart'];
-        $this->session = new Requests_Session(static::$site_url, array(), array(), $options);
+        $this->session = new Requests\Session(static::$site_url, array(), array(), $options);
 
         $cookie_saver = new cookie_saver();
         if(file_exists($cookie_saver->file(static::$site_slug)))
@@ -59,12 +61,17 @@ abstract class site
         $cookie_saver->save_cookies($this->session->options['cookies'], static::$site_slug);
     }
 
+    public function multipart_hook($ch)
+    {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->post_fields);
+    }
+
     /**
      * @param $url
      * @param array $headers
      * @param array $options
-     * @return Requests_Response
-     * @throws Requests_Exception
+     * @return Requests\Response
+     * @throws Requests\Exception
      */
     public function get($url, $headers = array(), $options = array())
     {
@@ -81,14 +88,22 @@ abstract class site
      * @param array $headers
      * @param array $data
      * @param array $options
-     * @return Requests_Response
-     * @throws Requests_Exception
+     * @return Requests\Response
+     * @throws Requests\Exception
      */
     public function post($url, $headers = array(), $data = array(), $options = array())
     {
         if(!static::$use_utf8)
             $data = utils::utf8_decode_array($data);
-        $response = $this->session->post($url, $headers, $data, $options);
+
+        $hooks = new Requests\Hooks();
+        $hooks->register('curl.before_send', [$this, 'multipart_hook']);
+        $this->post_fields = $data;
+        $response = $this->session->post($url, array('Content-Type' => 'multipart/form-data'), $data, [
+            'transport' => Requests\Transport\Curl::class,
+            'hooks' => $hooks
+        ]);
+
         $response->throw_for_status();
         if(!static::$use_utf8)
             $response->body = utf8_encode($response->body);
