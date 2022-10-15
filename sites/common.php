@@ -13,21 +13,6 @@ use torrentupload\site;
 abstract class common extends site
 {
     /**
-     * @var bool Use UTF-8 for the site?
-     */
-    public static bool $use_utf8 = true;
-
-    /**
-     * @var string Site slug used as identifier
-     */
-    public static string $site_slug;
-
-    /**
-     * @var string Site URL
-     */
-    public static string $site_url;
-
-    /**
      * Check if a user is logged in
      * @param Requests_Response|null $response Response with the front page of the tracker
      * @return bool|string Username of the logged-in user. Return false if no user is logged in

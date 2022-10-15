@@ -13,7 +13,20 @@ use Requests_Session;
 
 abstract class site
 {
-    protected $site;
+    /**
+     * @var bool Use UTF-8 for the site?
+     */
+    public static bool $use_utf8 = true;
+
+    /**
+     * @var string Site slug used as identifier
+     */
+    public static string $site_slug;
+
+    /**
+     * @var string Site URL
+     */
+    public static string $site_url;
     protected $site_folder;
     protected $common;
     public $session;
