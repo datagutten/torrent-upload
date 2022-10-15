@@ -90,4 +90,9 @@ class utils
         else
             return '';
     }
+
+    public static function strip_non_ascii($string): string
+    {
+        return preg_replace('/[^[:ascii:]]/', '', $string);
+    }
 }

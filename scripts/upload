@@ -58,7 +58,7 @@ $site = new $site_name;
 
 $pathinfo = pathinfo($getOpt->getOption('path'));
 
-$file_torrent = sprintf('%s/%s.torrent', $pathinfo['dirname'], $pathinfo['basename']);
+$file_torrent = sprintf('%s/%s.torrent', $pathinfo['dirname'], utils::strip_non_ascii($pathinfo['basename']));
 $file_mediainfo = sprintf('%s/%s.mediainfo', $pathinfo['dirname'], $pathinfo['basename']);
 if (!file_exists($file_mediainfo))
 {
