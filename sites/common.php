@@ -1,8 +1,8 @@
 <?php
 
-
 namespace torrentupload\sites;
 
+use datagutten\musicbrainz;
 use torrentupload\exceptions\AlreadyUploadedException;
 use torrentupload\exceptions\LoginFailedException;
 use torrentupload\exceptions\SiteErrorException;
@@ -26,6 +26,18 @@ abstract class common extends site
      * @throws LoginFailedException
      */
     abstract public function login(string $username, string $password): string;
+
+    /**
+     * Upload a torrent with info from a MusicBrainz release object
+     * @param string $torrentfile
+     * @param musicbrainz\seed\Release $release MusicBrainz release object
+     * @param string $description
+     * @param array $tags
+     * @param bool $re_release
+     * @param array $logs
+     * @return string
+     */
+    abstract public function upload_mb(string $torrentfile, musicbrainz\seed\Release $release, string $description, array $tags = [], bool $re_release = false, array $logs = []): string;
 
     /**
      * Check if the upload was successful
