@@ -6,6 +6,7 @@ use datagutten\musicbrainz;
 use torrentupload\exceptions\AlreadyUploadedException;
 use torrentupload\exceptions\LoginFailedException;
 use torrentupload\exceptions\SiteErrorException;
+use torrentupload\exceptions\UploadFailedException;
 use torrentupload\site;
 use WpOrg\Requests;
 
@@ -20,12 +21,23 @@ abstract class common extends site
 
     /**
      * Log in to the tracker website
-     * @param string $username Tracker user name
-     * @param string $password Tracker password
      * @return string Username of the logged-in user
      * @throws LoginFailedException
+     * @throws Requests\Exception
      */
-    abstract public function login(string $username, string $password): string;
+    abstract public function login(): string;
+
+    /**
+     * Upload a torrent file to the site
+     * @param string $torrentfile Torrent file
+     * @param string $title Torrent title
+     * @param string $description Torrent description
+     * @return string Torrent file URL
+     * @throws AlreadyUploadedException Torrent is already uploaded
+     * @throws SiteErrorException
+     * @throws UploadFailedException
+     */
+    abstract public function upload(string $torrentfile, string $title, string $description, array $categories, ...$args): string;
 
     /**
      * Upload a torrent with info from a MusicBrainz release object
