@@ -152,6 +152,6 @@ class upload
 
     public function log_files(): array
     {
-        return glob($this->folder . '/*.log');
+        return files::get_files($this->folder, ['log']);
     }
 }
